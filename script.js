@@ -1,3 +1,7 @@
+window.requestAnimationFrame = window.requestAnimationFrame ||
+window.webkitRequestAnimationFrame ||
+window.mozRequestAnimationFrame;
+
 var context = new AudioContext || webkitAudioContext;
 context = new AudioContext();
 
@@ -68,11 +72,12 @@ function parseFiles(files) {
 }
 
 function paintCanvas() {
+  ctx.clearRect(0, 0, canvas[0].width, canvas[0].height);
   ctx.fillStyle = 'ffdc00';
   var frequencyData = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(frequencyData);
-  for (var i = 0; i < frequencyData.length; i + 4) {
-    ctx.rect(i, frequencyData, 4, frequencyData);
+  for (var i = 0; i < frequencyData.length; i += 4) {
+    ctx.fillRect(i, 0, 4, frequencyData[i]);
   }
   requestAnimationFrame(paintCanvas);
 }

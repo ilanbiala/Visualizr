@@ -1,3 +1,7 @@
 input.filter {
 	width: 40%;
 }
+
+canvas {
+	-webkit-transform: rotateX(180deg);
+}
