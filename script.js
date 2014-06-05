@@ -1,9 +1,32 @@
 var context = new AudioContext || webkitAudioContext;
 context = new AudioContext();
 
+var analyser = context.createAnalyser();
+analyser.frequencyBinCount = 128;
+
+var source;
+var filter = context.createBiquadFilter();
+
+$('<audio/>', {
+  'controls': 'true',
+  'style': 'display: none;'
+}).appendTo('div.playlist');
+
+var audio = $('audio');
+var audioHTML = audio[0];
+
+var canvas, ctx;
+
 $(document).ready(function () {
-  var input = $('input')[0];
+  var input = $('table input')[0];
   input.addEventListener('drop', handleDrop, false);
+
+  $('#bassFilter').on('change', function (evt) {
+    filter.frequency.value = (1 - $(this).val()) * 22050;
+  });
+
+  canvas = $('canvas');
+  ctx = canvas[0].getContext('2d');
 });
 
 function handleDrop(evt) {
@@ -16,9 +39,14 @@ function handleDrop(evt) {
     }
   }
   parseFiles(validFiles);
-  $('<audio/>', {
-    'controls': 'true'
-  }).appendTo('body');
+  audio.css('display', 'block');
+  source = context.createMediaElementSource($('audio')[0]);
+  source.connect(analyser);
+  analyser.connect(filter);
+  filter.connect(context.destination);
+  filter.type = 0;
+  filter.frequency.value = 22050;
+  paintCanvas();
 }
 
 function parseFiles(files) {
@@ -37,4 +65,14 @@ function parseFiles(files) {
     // Read in the image file as a data URL.
     fileReader.readAsDataURL(file);
   }
+}
+
+function paintCanvas() {
+  ctx.fillStyle = 'ffdc00';
+  var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(frequencyData);
+  for (var i = 0; i < frequencyData.length; i + 4) {
+    ctx.rect(i, frequencyData, 4, frequencyData);
+  }
+  requestAnimationFrame(paintCanvas);
 }
