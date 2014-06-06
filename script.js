@@ -6,13 +6,14 @@ var context = new AudioContext || webkitAudioContext;
 context = new AudioContext();
 
 var analyser = context.createAnalyser();
-analyser.frequencyBinCount = 128;
+analyser.frequencyBinCount = 256;
 
 var source;
 var filter = context.createBiquadFilter();
 
 $('<audio/>', {
   'controls': 'true',
+  'autoplay': 'true',
   'style': 'display: none;'
 }).appendTo('div.playlist');
 
@@ -29,6 +30,10 @@ $(document).ready(function () {
     filter.frequency.value = (1 - $(this).val()) * 22050;
   });
 
+  $('td').on('click', 'tbody', function(e) {
+    console.log('clicked');
+  });
+
   canvas = $('canvas');
   ctx = canvas[0].getContext('2d');
 });
@@ -40,6 +45,8 @@ function handleDrop(evt) {
   for (var file in files) {
     if (files[file].type == 'audio/mp3' || files[file].type == 'audio/ogg') {
       validFiles.push(files[file]);
+      var newRow = '<tr><td>' + files[file].name + '</td></tr>';
+      $('tbody').prepend($(newRow));
     }
   }
   parseFiles(validFiles);
@@ -62,6 +69,7 @@ function parseFiles(files) {
     fileReader.onload = (function(file) {
       return function(e) {
         var parsedFile = e.currentTarget.result;
+        $('tbody tr')[i].setAttribute('data-src', parsedFile);
         $('audio').append('<source src="' + parsedFile + '" type="audio/mp3">')
       };
     })(file);
@@ -76,7 +84,7 @@ function paintCanvas() {
   ctx.fillStyle = 'ffdc00';
   var frequencyData = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(frequencyData);
-  for (var i = 0; i < frequencyData.length; i += 4) {
+  for (var i = 0; i < frequencyData.length; i += 2) {
     ctx.fillRect(i, 0, 4, frequencyData[i]);
   }
   requestAnimationFrame(paintCanvas);

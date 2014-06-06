@@ -1,7 +1,37 @@
+div.container {
+	display: flex;
+}
+
+div.playlist {
+	flex: 1 1 auto;
+}
+
 input.filter {
 	width: 40%;
 }
 
+audio {
+	display: block;
+	position: fixed;
+	left: 0;
+	bottom: 0;
+}
+
 canvas {
 	-webkit-transform: rotateX(180deg);
+	flex: 2 2 auto;
+}
+
+@media (max-width: 600px) {
+	div.container {
+		display: block;
+	}
+
+	div.playlist {
+		width: 300px
+	}
+
+	canvas {
+		width: 100%;
+	}
 }
